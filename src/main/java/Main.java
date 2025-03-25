@@ -1,9 +1,7 @@
+import com.github.javafaker.Faker;
 import mypackage.*;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -35,5 +33,20 @@ public class Main {
 
         System.out.println("Enemy locations:");
         enemyLocations.forEach(System.out::println);
+
+        // Random locations
+        Location[] randomLocations = new Location[10];
+        LocationType[] types = LocationType.values();
+        Random rand = new Random();
+        Faker faker = new Faker();
+
+        for (int i = 0; i < randomLocations.length; i++) {
+            randomLocations[i] = new Location(types[rand.nextInt(types.length)], faker.address().streetName());
+        }
+
+        System.out.println("Random Locations:");
+        for (Location location : randomLocations) {
+            System.out.println(location);
+        }
     }
 }
