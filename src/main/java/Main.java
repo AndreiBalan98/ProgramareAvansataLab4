@@ -1,14 +1,14 @@
 import com.github.javafaker.Faker;
 import mypackage.*;
 import mypackage.GraphMap;
-import org.jgrapht.Graph;
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
+        // COMPULSORY
+        /*// Generate locations
         Location[] locations = new Location[5];
 
         locations[0] = new Location(LocationType.FRIENDLY, "Location1");
@@ -35,8 +35,9 @@ public class Main {
                         .collect(Collectors.toCollection(LinkedList::new));
 
         System.out.println("Enemy locations:");
-        enemyLocations.forEach(System.out::println);
+        enemyLocations.forEach(System.out::println);*/
 
+        // HOMEWORK
         // Random locations
         Location[] randomLocations = new Location[10];
         LocationType[] types = LocationType.values();
@@ -52,6 +53,7 @@ public class Main {
             System.out.println(location);
         }
 
+        // Fastest routes
         GraphMap myMap = new GraphMap(20, 40);
         System.out.println();
         myMap.printMap();
@@ -60,6 +62,7 @@ public class Main {
         myRobot.setCurrentLocation(myMap.getLocations()[rand.nextInt(myMap.getLocations().length)]);
         List<RouteInfo> routes = myRobot.findShortestPaths();
 
+        // Grouped locations
         Map<LocationType, List<Location>> groupedLocations = Arrays.stream(myMap.getLocations()).collect(Collectors.groupingBy(Location::getType));
         System.out.println("\nGrouped Locations:");
         groupedLocations.forEach((type, locationsOfType) -> {
@@ -67,6 +70,7 @@ public class Main {
             locationsOfType.forEach(location -> System.out.println("  - " + location.getName()));
         });
 
+        // Grouped routes
         Map<LocationType, List<RouteInfo>> groupedRoutes = routes.stream()
                 .collect(Collectors.groupingBy(route -> route.getTarget().getType()));
 
