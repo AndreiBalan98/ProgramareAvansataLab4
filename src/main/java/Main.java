@@ -1,5 +1,8 @@
 import com.github.javafaker.Faker;
 import mypackage.*;
+import mypackage.GraphMap;
+import org.jgrapht.Graph;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,5 +51,31 @@ public class Main {
         for (Location location : randomLocations) {
             System.out.println(location);
         }
+
+        GraphMap myMap = new GraphMap(20, 40);
+        System.out.println();
+        myMap.printMap();
+        Robot myRobot = new Robot();
+        myRobot.setGraph(myMap.getGraph());
+        myRobot.setCurrentLocation(myMap.getLocations()[rand.nextInt(myMap.getLocations().length)]);
+        List<RouteInfo> routes = myRobot.findShortestPaths();
+
+        Map<LocationType, List<Location>> groupedLocations = Arrays.stream(myMap.getLocations()).collect(Collectors.groupingBy(Location::getType));
+        System.out.println("\nGrouped Locations:");
+        groupedLocations.forEach((type, locationsOfType) -> {
+            System.out.println(type + ":");
+            locationsOfType.forEach(location -> System.out.println("  - " + location.getName()));
+        });
+
+        Map<LocationType, List<RouteInfo>> groupedRoutes = routes.stream()
+                .collect(Collectors.groupingBy(route -> route.getTarget().getType()));
+
+        groupedRoutes.forEach((type, routeList) -> {
+            System.out.println("\n=== Fastest Routes to " + type + " Locations ===");
+
+            routeList.stream()
+                    .sorted(Comparator.comparingDouble(RouteInfo::getTotalTime))
+                    .forEach(route -> System.out.println("To " + route.getTarget() + " -> Time: " + route.getTotalTime()));
+        });
     }
 }
