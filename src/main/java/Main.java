@@ -1,6 +1,9 @@
 import com.github.javafaker.Faker;
 import mypackage.*;
 import mypackage.GraphMap;
+import org.jgrapht.GraphPath;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultWeightedEdge;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,7 +40,7 @@ public class Main {
         System.out.println("Enemy locations:");
         enemyLocations.forEach(System.out::println);*/
 
-        // HOMEWORK
+        /*// HOMEWORK
         // Random locations
         Location[] randomLocations = new Location[10];
         LocationType[] types = LocationType.values();
@@ -80,6 +83,65 @@ public class Main {
             routeList.stream()
                     .sorted(Comparator.comparingDouble(RouteInfo::getTotalTime))
                     .forEach(route -> System.out.println("To " + route.getTarget() + " -> Time: " + route.getTotalTime()));
-        });
+        });*/
+
+        // BONUS
+        // Safest routes
+        ArrayList<ExecutionResult> results = new ArrayList<>();
+
+        for (int locations = 100; locations <= 500; locations += 100) {
+            for (int connections = 1 * locations; connections <= 5 * locations; connections += locations) {
+                GraphMap myMap = new GraphMap(locations, connections);
+                Robot myRobot = new Robot();
+
+                myRobot.setGraph(myMap.getGraph());
+                myRobot.setProbGraph(myMap.getProbGraph(), myMap.getProbabilities());
+                myRobot.setCurrentLocation(myMap.getLocations()[new Random().nextInt(locations)]);
+
+                long startTime = System.nanoTime();
+                var shortestPaths = myRobot.findShortestPaths();
+                long endTime = System.nanoTime();
+                long durationMs = (endTime - startTime) / 1_000_000;
+                results.add(new ExecutionResult(TestType.SHORTEST_PATH ,locations, connections, durationMs));
+
+                startTime = System.nanoTime();
+                var safestPaths = myRobot.findSafestPaths();
+                endTime = System.nanoTime();
+                durationMs = (endTime - startTime) / 1_000_000;
+                results.add(new ExecutionResult(TestType.SAFEST_PATH ,locations, connections, durationMs));
+
+                Map<GraphPath<Location, DefaultWeightedEdge>, Map<LocationType, Integer>> pathsByType = safestPaths.stream()
+                        .collect(Collectors.toMap(
+                                path -> path,
+                                path -> path.getVertexList().stream()
+                                        .collect(Collectors.groupingBy(Location::getType, Collectors.summingInt(l -> 1)))
+                        ));
+
+                pathsByType.forEach((path, typeCount) -> {
+                    System.out.println("Path: " + path);
+                    typeCount.forEach((type, count) -> System.out.println("  " + type + ": " + count));
+                });
+
+                for (RouteInfo path : shortestPaths) {
+                    System.out.println("Path: " + path);
+                }
+            }
+        }
+
+        // Sortare dupa timp de executie
+        List<ExecutionResult> sortedByTime = results.stream()
+                .sorted(Comparator.comparingLong(ExecutionResult::getExecutionTime))
+                .collect(Collectors.toList());
+        System.out.println("🔹 Rezultate sortate după timp (crescător):");
+        sortedByTime.forEach(System.out::println);
+
+        // Media timpului de executie per testType
+        Map<TestType, Double> avgExecutionTime = results.stream()
+                .collect(Collectors.groupingBy(
+                        ExecutionResult::getTestType,
+                        Collectors.averagingLong(ExecutionResult::getExecutionTime)
+                ));
+        System.out.println("\n🔹 Media timpului de execuție:");
+        avgExecutionTime.forEach((type, avg) -> System.out.println(type + ": " + avg + " ms"));
     }
 }
