@@ -90,7 +90,7 @@ public class Main {
         ArrayList<ExecutionResult> results = new ArrayList<>();
 
         for (int locations = 100; locations <= 500; locations += 100) {
-            for (int connections = 1 * locations; connections <= 5 * locations; connections += locations) {
+            for (int connections = locations; connections <= 5 * locations; connections += locations) {
                 GraphMap myMap = new GraphMap(locations, connections);
                 Robot myRobot = new Robot();
 
@@ -131,7 +131,7 @@ public class Main {
         // Sortare dupa timp de executie
         List<ExecutionResult> sortedByTime = results.stream()
                 .sorted(Comparator.comparingLong(ExecutionResult::getExecutionTime))
-                .collect(Collectors.toList());
+                .toList();
         System.out.println("🔹 Rezultate sortate după timp (crescător):");
         sortedByTime.forEach(System.out::println);
 
